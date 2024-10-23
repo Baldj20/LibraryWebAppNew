@@ -1,3 +1,9 @@
+using LibraryWebApp.Application.Abstractions.Repositories;
+using LibraryWebApp.Infrastructure;
+using LibraryWebApp.Infrastructure.Mappers;
+using LibraryWebApp.Infrastructure.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LibraryWebApp.API
 {
@@ -14,6 +20,19 @@ namespace LibraryWebApp.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddAutoMapper(typeof(AuthorProfile),
+                typeof(BookProfile), typeof(UserBookProfile), typeof(UserProfile));
+
+            builder.Services.AddDbContext<LibraryDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            builder.Services.AddScoped<IBookRepository, BookRepository>();
+            builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUserBookRepository, UserBookRepository>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -26,7 +45,6 @@ namespace LibraryWebApp.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
