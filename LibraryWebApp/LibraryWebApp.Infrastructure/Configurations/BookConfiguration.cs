@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraryWebApp.Infrastructure.Configurations
 {
-    public  class BookConfiguration : IEntityTypeConfiguration<BookEntity>
+    public class BookConfiguration : IEntityTypeConfiguration<BookEntity>
     {
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<BookEntity> builder)
         {
@@ -20,15 +20,14 @@ namespace LibraryWebApp.Infrastructure.Configurations
 
             builder
                 .Property(book => book.Description);
-
             
             builder
                 .HasOne(book => book.Author)
                 .WithMany(author => author.Books);
 
             builder
-                .HasOne<UserBookEntity>()
-                .WithOne();
+                .HasMany<UserBookEntity>()
+                .WithOne().HasForeignKey(userBook => userBook.ISBN);
         }
     }
 }

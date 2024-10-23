@@ -8,7 +8,7 @@ namespace LibraryWebApp.Infrastructure.Configurations
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<UserBookEntity> builder)
         {
             builder
-                .HasKey(userBook => userBook.ISBN);
+                .HasKey(userBook => userBook.Id);
 
             builder
                 .Property(userBook => userBook.ReceiptDate)
@@ -21,10 +21,6 @@ namespace LibraryWebApp.Infrastructure.Configurations
             builder
                 .HasOne(userBook => userBook.User)
                 .WithMany(user => user.TakenBooks);
-
-            builder
-                .HasOne<BookEntity>()
-                .WithOne().HasForeignKey<UserBookEntity>(userBook => userBook.ISBN);
         }
     }
 }
