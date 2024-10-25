@@ -1,6 +1,4 @@
-﻿using LibraryWebApp.Domain;
-
-namespace LibraryWebApp.Application.Abstractions.Repositories
+﻿namespace LibraryWebApp.Application.Abstractions.Repositories
 {
     public interface IRepository<T>
     {

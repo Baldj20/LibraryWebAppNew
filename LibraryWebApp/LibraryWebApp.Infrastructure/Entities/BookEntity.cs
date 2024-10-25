@@ -9,5 +9,6 @@ namespace LibraryWebApp.Infrastructure.Entities
         public string Genre { get; set; }
         public string Description { get; set; }
         public AuthorEntity Author { get; set; }
+        public int Count { get; set; }
     }
 }

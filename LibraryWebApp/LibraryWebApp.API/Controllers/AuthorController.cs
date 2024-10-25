@@ -1,6 +1,5 @@
 ﻿using LibraryWebApp.Application.Abstractions.Services;
 using LibraryWebApp.Application.DTO;
-using LibraryWebApp.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryWebApp.API.Controllers

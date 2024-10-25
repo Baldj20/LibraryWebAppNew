@@ -48,7 +48,8 @@ namespace LibraryWebApp.Infrastructure.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Genre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AuthorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    AuthorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Count = table.Column<int>(type: "int", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>
                 {

@@ -15,6 +15,10 @@ namespace LibraryWebApp.Infrastructure.Configurations
                 .IsRequired();
 
             builder
+                .Property(book => book.Count)
+                .HasDefaultValue(0);
+
+            builder
                 .Property(book => book.Genre)
                 .IsRequired();
 

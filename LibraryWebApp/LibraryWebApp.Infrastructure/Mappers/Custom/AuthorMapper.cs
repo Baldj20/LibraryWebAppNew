@@ -47,29 +47,10 @@ namespace LibraryWebApp.Infrastructure.Mappers.Custom
 
             foreach (var bookDTO in booksDTO)
             {
-                //try
-                //{
-                //    var book = await _bookRepository.GetByISBN(bookDTO.ISBN);
-                //    author.AddBook(book);
-                //    //books.Add(book);
-                //}
-                //catch (Exception ex)
-                //{
-                //    var book = new Book(bookDTO.ISBN, bookDTO.Title, bookDTO.Genre, bookDTO.Description, author);
-
-                //    author.AddBook(book);
-                //    await _bookRepository.Add(book);
-                //    //books.Add(book);
-                //}
-
-                var book = new Book(bookDTO.ISBN, bookDTO.Title, bookDTO.Genre, bookDTO.Description, author);
+                var book = new Book(bookDTO.ISBN, bookDTO.Title, bookDTO.Genre, bookDTO.Description, author, bookDTO.Count);
 
                 author.AddBook(book);
-                //await _bookRepository.Add(book);
-                //books.Add(book);
-
             }
-            //author.Books = books;
 
             return author;
         }

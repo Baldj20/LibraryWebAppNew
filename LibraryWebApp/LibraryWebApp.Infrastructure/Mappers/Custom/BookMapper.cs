@@ -20,7 +20,8 @@ namespace LibraryWebApp.Infrastructure.Mappers.Custom
                 Title = entity.Title,
                 Genre = entity.Genre,
                 Description = entity.Description,
-                AuthorId = entity.Author.Id
+                AuthorId = entity.Author.Id,
+                Count = entity.Count,
             };
 
             return bookDTO;
@@ -29,7 +30,7 @@ namespace LibraryWebApp.Infrastructure.Mappers.Custom
         public async Task<Book> ToEntity(BookDTO dto)
         {
             var author = await _authorRepository.GetById(dto.AuthorId);
-            var book = new Book(dto.ISBN, dto.Title, dto.Genre, dto.Description, author);
+            var book = new Book(dto.ISBN, dto.Title, dto.Genre, dto.Description, author, dto.Count);
             return book;
         }
     }

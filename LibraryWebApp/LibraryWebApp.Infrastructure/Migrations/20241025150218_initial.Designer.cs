@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryWebApp.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    [Migration("20241023203940_initial")]
+    [Migration("20241025150218_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -58,6 +58,11 @@ namespace LibraryWebApp.Infrastructure.Migrations
 
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Count")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<string>("Description")
                         .IsRequired()

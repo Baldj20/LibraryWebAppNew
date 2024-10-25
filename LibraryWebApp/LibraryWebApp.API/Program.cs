@@ -7,7 +7,6 @@ using LibraryWebApp.Infrastructure.Mappers.Custom;
 using LibraryWebApp.Infrastructure.Repositories;
 using LibraryWebApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LibraryWebApp.API
 {
