@@ -9,7 +9,8 @@ namespace LibraryWebApp.Infrastructure.Mappers
         public AuthorProfile()
         {
             CreateMap<Author, AuthorEntity>();
-            CreateMap<AuthorEntity, Author>();
-        }
+            CreateMap<AuthorEntity, Author>();           
+        }       
     }
 }
+ 

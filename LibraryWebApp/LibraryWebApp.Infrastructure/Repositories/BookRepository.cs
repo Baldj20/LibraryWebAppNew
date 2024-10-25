@@ -2,6 +2,7 @@
 using LibraryWebApp.Application.Abstractions.Repositories;
 using LibraryWebApp.Domain;
 using LibraryWebApp.Infrastructure.Entities;
+using LibraryWebApp.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryWebApp.Infrastructure.Repositories
@@ -44,7 +45,7 @@ namespace LibraryWebApp.Infrastructure.Repositories
         public async Task<Book> GetByISBN(string isbn)
         {
             var book = await _context.Books.Where(book => book.ISBN == isbn).FirstAsync();
-
+            if (book == null) throw new NotFoundException(isbn);
             return _mapper.Map<Book>(book);
         }
 

@@ -1,4 +1,8 @@
-﻿namespace LibraryWebApp.Domain
+﻿using static System.Reflection.Metadata.BlobBuilder;
+using System.Diagnostics.Metrics;
+using System.Xml.Linq;
+
+namespace LibraryWebApp.Domain
 {
     public class Author
     {
@@ -11,6 +15,19 @@
             BirthDate = birthDate;
             Country = country;
             Books = books;
+        }
+        public Author()
+        {
+            Id = new Guid();
+            Name = string.Empty;
+            Surname = string.Empty;
+            BirthDate = DateTime.MinValue;
+            Country = string.Empty;
+            Books = null;
+        }
+        public void AddBook(Book book)
+        {
+            Books.Add(book);
         }
         public Guid Id { get; }
         public string Name { get; }

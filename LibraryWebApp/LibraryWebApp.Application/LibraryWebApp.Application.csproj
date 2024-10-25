@@ -10,8 +10,4 @@
     <ProjectReference Include="..\LibraryWebApp.Domain\LibraryWebApp.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTO\" />
-  </ItemGroup>
-
 </Project>

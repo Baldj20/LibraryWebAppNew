@@ -1,9 +1,10 @@
-﻿using LibraryWebApp.Domain;
+﻿using LibraryWebApp.Application.DTO;
+using LibraryWebApp.Domain;
 
 namespace LibraryWebApp.Application.Abstractions.Services
 {
-    public interface IAuthorService : IService<Author>
+    public interface IAuthorService : IService<AuthorDTO>
     {
-        public Task<List<Book>> GetBooks(Guid authorId);
+        public Task<List<BookDTO>> GetBooks(Guid authorId);
     }
 }
