@@ -19,7 +19,10 @@ namespace LibraryWebApp.Infrastructure.Repositories
         public async Task Add(Book entity)
         {
             var book = _mapper.Map<BookEntity>(entity);
-
+            var author = _context.Authors.Where(author => author.Id == entity.Author.Id)
+                .Include(author => author.Books).FirstOrDefault();
+            if (author == null) throw new NotFoundException("Author not found");
+            book.Author = author;
             await _context.Books.AddAsync(book);
             await _context.SaveChangesAsync();
         }
@@ -33,7 +36,19 @@ namespace LibraryWebApp.Infrastructure.Repositories
 
         public async Task<List<Book>> GetAll()
         {
-            var bookEntities = await _context.Books
+            var bookEntities = await _context.Books.Include(b => b.Author)
+                .Select(book => new BookEntity
+                {
+                    ISBN = book.ISBN,
+                    Title = book.Title,
+                    Genre = book.Genre,
+                    Description = book.Description,
+                    Count = book.Count,
+                    Author = new AuthorEntity()
+                    {
+                        Id = book.Author.Id,
+                    }
+                })
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -44,20 +59,35 @@ namespace LibraryWebApp.Infrastructure.Repositories
 
         public async Task<Book> GetByISBN(string isbn)
         {
-            var book = await _context.Books.Where(book => book.ISBN == isbn).FirstAsync();
-            if (book == null) throw new NotFoundException(isbn);
-            return _mapper.Map<Book>(book);
+            try
+            {
+                var book = await _context.Books.Where(book => book.ISBN == isbn)
+                    .Include(book => book.Author)
+                    .Select(book => new BookEntity
+                    {
+                        ISBN = book.ISBN,
+                        Title = book.Title,
+                        Genre = book.Genre,
+                        Description = book.Description,
+                        Count = book.Count,
+                        Author = new AuthorEntity()
+                        {
+                            Id = book.Author.Id,
+                        }
+                    }).FirstAsync();
+
+                return _mapper.Map<Book>(book);
+            }
+            catch (Exception ex)
+            {
+                throw new NotFoundException($"Book with ISBN {isbn} not found");
+            }            
         }
 
         public async Task Update(string isbn, Book entity)
         {
-            var authorEntity = _mapper.Map<AuthorEntity>(entity);
-
-            await _context.Books.Where(book => book.ISBN == isbn).ExecuteUpdateAsync(book => book
-            .SetProperty(a => a.Title, a => entity.Title)
-            .SetProperty(a => a.Genre, a => entity.Genre)
-            .SetProperty(a => a.Description, a => entity.Description)
-            .SetProperty(a => a.Author, a => authorEntity));
+            await Delete(isbn);
+            await Add(entity);
         }
     }
 }

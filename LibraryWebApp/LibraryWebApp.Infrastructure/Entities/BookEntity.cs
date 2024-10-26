@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace LibraryWebApp.Infrastructure.Entities
+﻿namespace LibraryWebApp.Infrastructure.Entities
 {
     public class BookEntity
     {

@@ -1,19 +1,33 @@
-﻿using LibraryWebApp.Application.Abstractions.Repositories;
+﻿using LibraryWebApp.Application.Abstractions.Mappers;
+using LibraryWebApp.Application.Abstractions.Repositories;
 using LibraryWebApp.Application.Abstractions.Services;
-using LibraryWebApp.Domain;
+using LibraryWebApp.Application.DTO;
+using LibraryWebApp.Infrastructure.Exceptions;
 
 namespace LibraryWebApp.Infrastructure.Services
 {
     public class BookService : IBookService
     {
         private readonly IBookRepository _bookRepository;
-        public BookService(IBookRepository bookRepository)
+        private readonly IAuthorRepository _authorRepository;
+        private readonly IBookMapper _bookMapper;
+        public BookService(IBookRepository bookRepository, 
+            IAuthorRepository authorRepository, IBookMapper bookMapper)
         {
+            _authorRepository = authorRepository;
             _bookRepository = bookRepository;
+            _bookMapper = bookMapper;
         }
-        public async Task Add(Book entity)
+        public async Task Add(BookDTO dto)
         {
-            await _bookRepository.Add(entity);
+            var book = await _bookMapper.ToEntity(dto);
+            var author = await _authorRepository.GetById(dto.AuthorId);
+            if (author == null)
+            {
+                throw new NotFoundException("Author not found");
+            }
+            author.AddBook(book);
+            await _authorRepository.Update(author.Id, author);                     
         }
 
         public async Task Delete(string isbn)
@@ -21,19 +35,31 @@ namespace LibraryWebApp.Infrastructure.Services
             await _bookRepository.Delete(isbn);
         }
 
-        public async Task<List<Book>> GetAll()
+        public async Task<BookDTO> GetByISBN(string isbn)
         {
-            return await _bookRepository.GetAll();
+            var book = await _bookRepository.GetByISBN(isbn);
+            return _bookMapper.ToDTO(book);
         }
 
-        public async Task<Book> GetByISBN(string isbn)
+        public async Task Update(string isbn, BookDTO dto)
         {
-            return await _bookRepository.GetByISBN(isbn);
+            var book = await _bookMapper.ToEntity(dto);
+
+            await _bookRepository.Update(isbn, book);
         }
 
-        public async Task Update(string isbn, Book entity)
+        public async Task<List<BookDTO>> GetAll()
         {
-            await _bookRepository.Update(isbn, entity);
+            var bookDTOList = new List<BookDTO>();
+
+            var books = await _bookRepository.GetAll();
+
+            foreach (var book in books)
+            {
+                bookDTOList.Add(_bookMapper.ToDTO(book));
+            }
+
+            return bookDTOList;
         }
     }
 }
