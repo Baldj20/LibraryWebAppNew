@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LibraryWebApp.Application.Abstractions.Repositories;
 using LibraryWebApp.Domain;
+using LibraryWebApp.Domain.Models;
 using LibraryWebApp.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,10 +24,10 @@ namespace LibraryWebApp.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task Delete(Guid id)
+        public async Task Delete(string login)
         {
             await _context.Users
-                .Where(user => user.Id == id)
+                .Where(user => user.Login == login)
                 .ExecuteDeleteAsync();
         }
 
@@ -41,22 +42,47 @@ namespace LibraryWebApp.Infrastructure.Repositories
             return users;
         }
 
-        public async Task<User> GetById(Guid id)
+        public async Task<User?> GetByLogin(string login)
         {
-            var userEntity = await _context.Users.Where(user => user.Id == id).FirstAsync();
+            var userEntity = await _context.Users
+                .AsNoTracking()
+                .Where(user => user.Login == login)
+                .ToListAsync();
 
-            return _mapper.Map<User>(userEntity);
+            if (userEntity.Count == 0) { return null; }
+
+            return _mapper.Map<User>(userEntity.FirstOrDefault());
         }
 
-        public async Task Update(Guid id, User entity)
+        public async Task Update(string login, User entity)
         {
             var books = entity.TakenBooks;
             var bookEntities = _mapper.Map<List<UserBookEntity>>(books);
 
-            await _context.Users.Where(user => user.Id == id).ExecuteUpdateAsync(updUser => updUser
+            await _context.Users.Where(user => user.Login == login).ExecuteUpdateAsync(updUser => updUser
             .SetProperty(a => a.Login, a => entity.Login)
             .SetProperty(a => a.Password, a => entity.Password)
             .SetProperty(a => a.TakenBooks, a => bookEntities));
+        }
+        public async Task RegisterBookForUser(User user, Book book,
+            DateTime receiptDate, DateTime returnDate)
+        {
+            var userBook = new UserBook
+            {
+                ISBN = book.ISBN,
+                ReceiptDate = receiptDate,
+                ReturnDate = returnDate,
+                User = user
+            };
+
+            user.TakenBooks.Add(userBook);
+
+            var userBookEntity = _mapper.Map<UserBookEntity>(userBook);
+
+            await _context.UserBooks.AddAsync(userBookEntity);
+            await _context.SaveChangesAsync();
+
+            await Update(user.Login, user);
         }
     }
 }

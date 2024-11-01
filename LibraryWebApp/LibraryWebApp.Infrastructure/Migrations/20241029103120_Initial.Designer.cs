@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryWebApp.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    [Migration("20241025150218_initial")]
-    partial class initial
+    [Migration("20241029103120_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -83,6 +83,38 @@ namespace LibraryWebApp.Infrastructure.Migrations
                     b.ToTable("Books");
                 });
 
+            modelBuilder.Entity("LibraryWebApp.Infrastructure.Entities.RefreshTokenEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserLogin")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserLogin");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("LibraryWebApp.Infrastructure.Entities.UserBookEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -99,27 +131,23 @@ namespace LibraryWebApp.Infrastructure.Migrations
                     b.Property<DateTime>("ReturnDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserLogin")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ISBN");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserLogin");
 
                     b.ToTable("UserBooks");
                 });
 
             modelBuilder.Entity("LibraryWebApp.Infrastructure.Entities.UserEntity", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Login")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -128,7 +156,7 @@ namespace LibraryWebApp.Infrastructure.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("Login");
 
                     b.ToTable("Users");
                 });
@@ -144,6 +172,17 @@ namespace LibraryWebApp.Infrastructure.Migrations
                     b.Navigation("Author");
                 });
 
+            modelBuilder.Entity("LibraryWebApp.Infrastructure.Entities.RefreshTokenEntity", b =>
+                {
+                    b.HasOne("LibraryWebApp.Infrastructure.Entities.UserEntity", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserLogin")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("LibraryWebApp.Infrastructure.Entities.UserBookEntity", b =>
                 {
                     b.HasOne("LibraryWebApp.Infrastructure.Entities.BookEntity", null)
@@ -154,7 +193,7 @@ namespace LibraryWebApp.Infrastructure.Migrations
 
                     b.HasOne("LibraryWebApp.Infrastructure.Entities.UserEntity", "User")
                         .WithMany("TakenBooks")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserLogin")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -168,6 +207,8 @@ namespace LibraryWebApp.Infrastructure.Migrations
 
             modelBuilder.Entity("LibraryWebApp.Infrastructure.Entities.UserEntity", b =>
                 {
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("TakenBooks");
                 });
 #pragma warning restore 612, 618

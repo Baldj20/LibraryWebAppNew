@@ -2,8 +2,14 @@
 
 namespace LibraryWebApp.Application.Abstractions.Repositories
 {
-    public interface IUserRepository : IRepository<User>
+    public interface IUserRepository
     {
-        
+        public Task<List<User>> GetAll();
+        public Task Add(User entity);
+        public Task Update(string login, User entity);
+        public Task Delete(string login);
+        public Task<User?> GetByLogin(string login);
+        public Task RegisterBookForUser(User user, Book book,
+            DateTime receiptDate, DateTime returnDate);
     }
 }

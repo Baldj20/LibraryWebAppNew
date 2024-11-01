@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using LibraryWebApp.Application.Abstractions.Repositories;
-using LibraryWebApp.Domain;
 using LibraryWebApp.Domain.Models;
 using LibraryWebApp.Infrastructure.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +10,10 @@ namespace LibraryWebApp.Infrastructure.Repositories
     {
         private readonly IMapper _mapper;
         private readonly LibraryDbContext _context;
-        private readonly IUserRepository _userRepository;
-        public UserBookRepository(LibraryDbContext context, IUserRepository userRepository, IMapper mapper)
+        public UserBookRepository(LibraryDbContext context, IMapper mapper)
         {
             _mapper = mapper;
             _context = context;
-            _userRepository = userRepository;
         }
         public async Task Add(UserBook entity)
         {
@@ -49,25 +46,7 @@ namespace LibraryWebApp.Infrastructure.Repositories
             var book = await _context.UserBooks.Where(userBook => userBook.ISBN == isbn).FirstAsync();
 
             return _mapper.Map<UserBook>(book);
-        }
-
-        public async Task RegisterBookForUser(User user, Book book, 
-            DateTime receiptDate, DateTime returnDate)
-        {
-            var userBook = new UserBook
-            {
-                ISBN = book.ISBN,
-                ReceiptDate = receiptDate,
-                ReturnDate = returnDate,
-                User = user
-            };
-
-            user.TakenBooks.Add(userBook);
-
-            await Add(userBook);
-
-            await _userRepository.Update(user.Id, user);
-        }
+        }        
 
         public async Task Update(string isbn, UserBook entity)
         {

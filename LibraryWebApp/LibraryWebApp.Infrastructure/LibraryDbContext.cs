@@ -9,7 +9,10 @@ namespace LibraryWebApp.Infrastructure
         public LibraryDbContext(DbContextOptions<LibraryDbContext> options) :
             base(options)
         {
-
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
         } 
       
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -20,10 +23,12 @@ namespace LibraryWebApp.Infrastructure
             modelBuilder.ApplyConfiguration(new BookConfiguration());
             modelBuilder.ApplyConfiguration(new UserBookConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         }
         public DbSet<AuthorEntity> Authors { get; set; }
         public DbSet<BookEntity> Books { get; set; }
         public DbSet<UserBookEntity> UserBooks { get; set; }
         public DbSet<UserEntity> Users { get; set; }
+        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
     }
 }

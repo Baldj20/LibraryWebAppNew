@@ -8,11 +8,7 @@ namespace LibraryWebApp.Infrastructure.Configurations
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<UserEntity> builder)
         {
             builder
-                .HasKey(user => user.Id);
-
-            builder
-                .Property(user => user.Login)
-                .IsRequired();
+                .HasKey(user => user.Login);
 
             builder
                 .Property(user => user.Password)
@@ -21,6 +17,10 @@ namespace LibraryWebApp.Infrastructure.Configurations
             builder
                 .HasMany(user => user.TakenBooks)
                 .WithOne(userBook => userBook.User);
+
+            builder
+                .HasMany(user => user.RefreshTokens)
+                .WithOne(token => token.User);
         }
     }
 }

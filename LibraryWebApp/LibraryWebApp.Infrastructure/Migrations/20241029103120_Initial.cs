@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LibraryWebApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,14 +30,13 @@ namespace LibraryWebApp.Infrastructure.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Login = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Login = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.Login);
                 });
 
             migrationBuilder.CreateTable(
@@ -63,6 +62,28 @@ namespace LibraryWebApp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Expires = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsRevoked = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserLogin = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_Users_UserLogin",
+                        column: x => x.UserLogin,
+                        principalTable: "Users",
+                        principalColumn: "Login",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserBooks",
                 columns: table => new
                 {
@@ -70,7 +91,7 @@ namespace LibraryWebApp.Infrastructure.Migrations
                     ISBN = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ReceiptDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ReturnDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    UserLogin = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -82,10 +103,10 @@ namespace LibraryWebApp.Infrastructure.Migrations
                         principalColumn: "ISBN",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserBooks_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_UserBooks_Users_UserLogin",
+                        column: x => x.UserLogin,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "Login",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -95,19 +116,27 @@ namespace LibraryWebApp.Infrastructure.Migrations
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserLogin",
+                table: "RefreshTokens",
+                column: "UserLogin");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserBooks_ISBN",
                 table: "UserBooks",
                 column: "ISBN");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserBooks_UserId",
+                name: "IX_UserBooks_UserLogin",
                 table: "UserBooks",
-                column: "UserId");
+                column: "UserLogin");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "RefreshTokens");
+
             migrationBuilder.DropTable(
                 name: "UserBooks");
 

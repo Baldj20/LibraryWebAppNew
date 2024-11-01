@@ -1,18 +1,16 @@
 ﻿using AutoMapper;
 using LibraryWebApp.Application.DTO;
-using LibraryWebApp.Domain;
 using LibraryWebApp.Domain.Models;
 using LibraryWebApp.Infrastructure.Entities;
 
 namespace LibraryWebApp.Infrastructure.Mappers
 {
-    public class BookProfile : Profile
-    { 
-        public BookProfile()
+    public class RefreshTokenProfile : Profile
+    {
+        public RefreshTokenProfile()
         {
-            CreateMap<Book, BookEntity>();
-
-            CreateMap<BookEntity, Book>();
+            CreateMap<RefreshToken, RefreshTokenEntity>();
+            CreateMap<RefreshTokenEntity, RefreshToken>();
         }
     }
 }
