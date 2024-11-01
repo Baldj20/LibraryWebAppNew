@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LibraryWebApp.Application;
 using LibraryWebApp.Application.Abstractions.Repositories;
 using LibraryWebApp.Domain;
 using LibraryWebApp.Infrastructure.Entities;
@@ -88,6 +89,51 @@ namespace LibraryWebApp.Infrastructure.Repositories
                             }).FirstOrDefaultAsync();
 
             return _mapper.Map<Author>(authorEntity);
+        }
+
+        public async Task<PagedResult<Author>> GetPaged(PaginationParams paginationParams)
+        {
+            var query = _context.Authors.AsQueryable();
+
+            var totalItems = await query.CountAsync();
+
+            var itemsQuery = query
+                .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                .Take(paginationParams.PageSize);
+
+            var authorEntities = await itemsQuery
+                            .Include(a => a.Books)
+                            .AsNoTracking()
+                            .Select(ae => new AuthorEntity
+                            {
+                                Id = ae.Id,
+                                Name = ae.Name,
+                                Surname = ae.Surname,
+                                BirthDate = ae.BirthDate,
+                                Country = ae.Country,
+                                Books = (List<BookEntity>)ae.Books.Select(b => new BookEntity
+                                {
+                                    ISBN = b.ISBN,
+                                    Title = b.Title,
+                                    Genre = b.Genre,
+                                    Description = b.Description,
+                                    Author = new AuthorEntity() { Id = ae.Id },
+                                    Count = b.Count
+                                })
+                            }).ToListAsync();
+            
+            var pagedAuthors = new PagedResult<Author>
+            {
+                Items = _mapper.Map<List<Author>>(authorEntities),
+                TotalCount = totalItems,
+                PageSize = paginationParams.PageSize,
+                PageNumber = paginationParams.PageNumber,
+                TotalPages = totalItems % paginationParams.PageSize == 0 ? 
+                    totalItems % paginationParams.PageSize :
+                    totalItems % paginationParams.PageSize + 1,
+            };
+
+            return pagedAuthors;
         }
 
         public async Task Update(Guid id, Author entity)

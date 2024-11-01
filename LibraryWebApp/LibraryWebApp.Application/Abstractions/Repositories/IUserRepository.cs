@@ -2,7 +2,7 @@
 
 namespace LibraryWebApp.Application.Abstractions.Repositories
 {
-    public interface IUserRepository
+    public interface IUserRepository : IPagedRepository<User>
     {
         public Task<List<User>> GetAll();
         public Task Add(User entity);

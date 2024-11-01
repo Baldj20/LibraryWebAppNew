@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LibraryWebApp.Application;
 using LibraryWebApp.Application.Abstractions.Repositories;
 using LibraryWebApp.Domain;
 using LibraryWebApp.Domain.Models;
@@ -83,6 +84,34 @@ namespace LibraryWebApp.Infrastructure.Repositories
             await _context.SaveChangesAsync();
 
             await Update(user.Login, user);
+        }
+
+        public async Task<PagedResult<User>> GetPaged(PaginationParams paginationParams)
+        {
+            var query = _context.Users.AsQueryable();
+
+            var totalItems = await query.CountAsync();
+
+            var itemsQuery = query
+                .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                .Take(paginationParams.PageSize);
+
+            var userEntities = await itemsQuery
+                .AsNoTracking()
+                .ToListAsync();
+
+            var pagedUsers = new PagedResult<User>
+            {
+                Items = _mapper.Map<List<User>>(userEntities),
+                TotalCount = totalItems,
+                PageSize = paginationParams.PageSize,
+                PageNumber = paginationParams.PageNumber,
+                TotalPages = totalItems % paginationParams.PageSize == 0 ?
+                    totalItems % paginationParams.PageSize :
+                    totalItems % paginationParams.PageSize + 1,
+            };
+
+            return pagedUsers;
         }
     }
 }

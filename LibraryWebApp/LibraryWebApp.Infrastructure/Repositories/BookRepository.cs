@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using LibraryWebApp.Application;
 using LibraryWebApp.Application.Abstractions.Repositories;
 using LibraryWebApp.Domain;
 using LibraryWebApp.Infrastructure.Entities;
@@ -82,6 +83,47 @@ namespace LibraryWebApp.Infrastructure.Repositories
             {
                 throw new NotFoundException($"Book with ISBN {isbn} not found");
             }            
+        }
+
+        public async Task<PagedResult<Book>> GetPaged(PaginationParams paginationParams)
+        {
+            var query = _context.Books.AsQueryable();
+
+            var totalItems = await query.CountAsync();
+
+            var itemsQuery = query
+                .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                .Take(paginationParams.PageSize);
+
+            var bookEntities = await _context.Books
+                .Include(b => b.Author)
+                .Select(book => new BookEntity
+                {
+                    ISBN = book.ISBN,
+                    Title = book.Title,
+                    Genre = book.Genre,
+                    Description = book.Description,
+                    Count = book.Count,
+                    Author = new AuthorEntity()
+                    {
+                        Id = book.Author.Id,
+                    }
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            var pagedBooks = new PagedResult<Book>
+            {
+                Items = _mapper.Map<List<Book>>(bookEntities),
+                TotalCount = totalItems,
+                PageSize = paginationParams.PageSize,
+                PageNumber = paginationParams.PageNumber,
+                TotalPages = totalItems % paginationParams.PageSize == 0 ?
+                    totalItems % paginationParams.PageSize :
+                    totalItems % paginationParams.PageSize + 1,
+            };
+
+            return pagedBooks;
         }
 
         public async Task Update(string isbn, Book entity)
