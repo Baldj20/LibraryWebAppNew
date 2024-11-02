@@ -58,31 +58,24 @@ namespace LibraryWebApp.Infrastructure.Repositories
             return books;
         }
 
-        public async Task<Book> GetByISBN(string isbn)
+        public async Task<Book?> GetByISBN(string isbn)
         {
-            try
-            {
-                var book = await _context.Books.Where(book => book.ISBN == isbn)
-                    .Include(book => book.Author)
-                    .Select(book => new BookEntity
+            var book = await _context.Books.Where(book => book.ISBN == isbn)
+                .Include(book => book.Author)
+                .Select(book => new BookEntity
+                {
+                    ISBN = book.ISBN,
+                    Title = book.Title,
+                    Genre = book.Genre,
+                    Description = book.Description,
+                    Count = book.Count,
+                    Author = new AuthorEntity()
                     {
-                        ISBN = book.ISBN,
-                        Title = book.Title,
-                        Genre = book.Genre,
-                        Description = book.Description,
-                        Count = book.Count,
-                        Author = new AuthorEntity()
-                        {
-                            Id = book.Author.Id,
-                        }
-                    }).FirstAsync();
+                        Id = book.Author.Id,
+                    }
+                }).FirstOrDefaultAsync();
 
-                return _mapper.Map<Book>(book);
-            }
-            catch (Exception ex)
-            {
-                throw new NotFoundException($"Book with ISBN {isbn} not found");
-            }            
+            return _mapper.Map<Book>(book);
         }
 
         public async Task<PagedResult<Book>> GetPaged(PaginationParams paginationParams)

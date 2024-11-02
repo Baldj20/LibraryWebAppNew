@@ -14,8 +14,10 @@ namespace LibraryWebApp.Infrastructure.Mappers.Custom
             _bookRepository = bookRepository;
             _bookMapper = bookMapper;
         }
-        public AuthorDTO ToDTO(Author entity)
+        public AuthorDTO? ToDTO(Author entity)
         {
+            if (entity == null) return null;
+
             var books = entity.Books;
             var booksDTO = new List<BookDTO>();
 
@@ -36,8 +38,10 @@ namespace LibraryWebApp.Infrastructure.Mappers.Custom
             return authorDTO;
         }
 
-        public async Task<Author> ToEntity(AuthorDTO dto)
+        public async Task<Author?> ToEntity(AuthorDTO dto)
         {
+            if (dto == null) return null;
+
             var booksDTO = dto.Books;
 
             var books = new List<Book>();

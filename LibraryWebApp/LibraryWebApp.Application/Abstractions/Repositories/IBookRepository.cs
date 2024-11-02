@@ -8,6 +8,6 @@ namespace LibraryWebApp.Application.Abstractions.Repositories
         public Task Add(Book entity);
         public Task Update(string isbn, Book entity);
         public Task Delete(string isbn);
-        public Task<Book> GetByISBN(string isbn);
+        public Task<Book?> GetByISBN(string isbn);
     }
 }

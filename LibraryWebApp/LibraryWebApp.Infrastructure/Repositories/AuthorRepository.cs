@@ -3,6 +3,7 @@ using LibraryWebApp.Application;
 using LibraryWebApp.Application.Abstractions.Repositories;
 using LibraryWebApp.Domain;
 using LibraryWebApp.Infrastructure.Entities;
+using LibraryWebApp.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryWebApp.Infrastructure.Repositories
@@ -26,9 +27,18 @@ namespace LibraryWebApp.Infrastructure.Repositories
 
         public async Task Delete(Guid id)
         {
-            await _context.Authors
-                .Where(author => author.Id == id)
-                .ExecuteDeleteAsync();
+            //await _context.Authors
+            //    .Where(author => author.Id == id)
+            //    .ExecuteDeleteAsync();
+            var author = await _context.Authors.Include(a => a.Books).FirstOrDefaultAsync(a => a.Id == id);
+            if (author != null)
+            {
+                // Удаляем все книги автора
+                _context.Books.RemoveRange(author.Books);
+                // Удаляем автора
+                _context.Authors.Remove(author);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<List<Author>> GetAll()
@@ -65,7 +75,7 @@ namespace LibraryWebApp.Infrastructure.Repositories
             return author.Books;
         }
 
-        public async Task<Author> GetById(Guid id)
+        public async Task<Author?> GetById(Guid id)
         {
             var authorEntity = await _context.Authors.Where(n => n.Id == id)
                             .Include(a => a.Books)
@@ -138,8 +148,16 @@ namespace LibraryWebApp.Infrastructure.Repositories
 
         public async Task Update(Guid id, Author entity)
         {
-            await Delete(id);
-            await Add(entity);
+            var author = await GetById(id);
+            if (author == null) throw new NotFoundException("Author to update not found");
+            author.Name = entity.Name;
+            author.Surname = entity.Surname;
+            author.BirthDate = entity.BirthDate;
+            author.Country = entity.Country;
+            author.Books.Clear();
+            author.Books.AddRange(entity.Books);
+
+            await _context.SaveChangesAsync();
         }
     }
 }

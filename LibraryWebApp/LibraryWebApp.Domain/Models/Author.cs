@@ -16,11 +16,11 @@
         {
             Books.Add(book);
         }
-        public Guid Id { get; }
-        public string Name { get; }
-        public string Surname { get; }
-        public DateTime BirthDate { get; }
-        public string Country { get; }
-        public List<Book> Books { get; }
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Surname { get; set; }
+        public DateTime BirthDate { get; set; }
+        public string Country { get; set; }
+        public List<Book> Books { get; set; }
     }
 }
