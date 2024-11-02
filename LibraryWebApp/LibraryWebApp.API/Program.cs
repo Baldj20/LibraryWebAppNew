@@ -12,6 +12,12 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Claims;
+using LibraryWebApp.Application.Abstractions.UseCases.AuthorUseCases;
+using LibraryWebApp.Application.UseCases.AuthorUseCases;
+using LibraryWebApp.Application.Abstractions.UseCases.BookUseCases;
+using LibraryWebApp.Application.UseCases.BookUseCases;
+using LibraryWebApp.Application.Abstractions.UseCases.UserUseCases;
+using LibraryWebApp.Application.UseCases.UserUseCases;
 
 namespace LibraryWebApp.API
 {
@@ -123,12 +129,30 @@ namespace LibraryWebApp.API
             builder.Services.AddScoped<IUserBookMapper, UserBookMapper>();
             builder.Services.AddScoped<ITokenMapper, TokenMapper>();
 
-            builder.Services.AddScoped<IBookService, BookService>();
-            builder.Services.AddScoped<IAuthorService, AuthorService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
-            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserBookService, UserBookService>();
 
+            builder.Services.AddScoped<IAddAuthorUseCase, AddAuthorUseCase>();
+            builder.Services.AddScoped<IDeleteAuthorUseCase, DeleteAuthorUseCase>();
+            builder.Services.AddScoped<IGetAllAuthorsUseCase, GetAllAuthorsUseCase>();
+            builder.Services.AddScoped<IGetAuthorBooksUseCase, GetAuthorBooksUseCase>();
+            builder.Services.AddScoped<IGetAuthorByIdUseCase, GetAuthorByIdUseCase>();
+            builder.Services.AddScoped<IUpdateAuthorUseCase, UpdateAuthorUseCase>();
+
+            builder.Services.AddScoped<IAddBookUseCase, AddBookUseCase>();
+            builder.Services.AddScoped<IDeleteBookUseCase, DeleteBookUseCase>();
+            builder.Services.AddScoped<IGetAllBooksUseCase, GetAllBooksUseCase>();
+            builder.Services.AddScoped<IGetBookByISBNUseCase, GetBookByISBNUseCase>();
+            builder.Services.AddScoped<IUpdateBookUseCase, UpdateBookUseCase>();
+
+            builder.Services.AddScoped<IAddUserUseCase, AddUserUseCase>();
+            builder.Services.AddScoped<IDeleteUserUseCase, DeleteUserUseCase>();
+            builder.Services.AddScoped<IGetAllUsersUseCase, GetAllUsersUseCase>();
+            builder.Services.AddScoped<IGetUserByLoginUseCase, GetUserByLoginUseCase>();
+            builder.Services.AddScoped<IUpdateUserUseCase, UpdateUserUseCase>();
+            builder.Services.AddScoped<IAuthorizeUseCase, AuthorizeUseCase>();
+            builder.Services.AddScoped<IRegisterBookForUserUseCase, RegisterBookForUserUseCase>();
+            builder.Services.AddScoped<IRegisterUserUseCase, RegisterUserUseCase>();
 
             builder.Logging.AddConsole();
             var app = builder.Build();
