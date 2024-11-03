@@ -16,7 +16,7 @@ namespace LibraryWebApp.Infrastructure
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            optionsBuilder.UseSqlServer(configuration.GetSection("ConnectionStrings").GetSection("DefaultConnection").Value);
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
 
             return new LibraryDbContext(optionsBuilder.Options);
         }

@@ -1,4 +1,6 @@
-﻿using LibraryWebApp.Application.Abstractions.Services;
+﻿using LibraryWebApp.Application;
+using LibraryWebApp.Application.Abstractions.Services;
+using LibraryWebApp.Application.Abstractions.UseCases.UserUseCases;
 using LibraryWebApp.Application.DTO;
 using LibraryWebApp.Domain;
 using LibraryWebApp.Domain.Models;
@@ -12,18 +14,39 @@ namespace LibraryWebApp.API.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IAddUserUseCase _addUserUseCase;
+        private readonly IDeleteUserUseCase _deleteUserUseCase;
+        private readonly IGetAllUsersUseCase _getAllUsersUseCase;
+        private readonly IGetUserByLoginUseCase _getUserByLoginUseCase;
+        private readonly IUpdateUserUseCase _updateUserUseCase;
+        private readonly IGetPagedUsersUseCase _getPagedUsersUseCase;
+        private readonly IRegisterUserUseCase _registerUserUseCase;
+        private readonly IAuthorizeUseCase _authorizeUseCase;
+        private readonly IRegisterBookForUserUseCase _registerBookForUserUseCase;
         private readonly ITokenService _tokenService;
-        public UserController(IUserService userService, ITokenService tokenService)
+
+        public UserController(IAddUserUseCase addUserUseCase, IDeleteUserUseCase deleteUserUseCase,
+            IGetAllUsersUseCase getAllUsersUseCase, IGetUserByLoginUseCase getUserByLoginUseCase,
+            IUpdateUserUseCase updateUserUseCase, IGetPagedUsersUseCase getPagedUsersUseCase,
+            IRegisterUserUseCase registerUserUseCase, IAuthorizeUseCase authorizeUseCase,
+            IRegisterBookForUserUseCase registerBookForUserUseCase, ITokenService tokenService)
         {
-            _userService = userService;
+            _addUserUseCase = addUserUseCase;
+            _deleteUserUseCase = deleteUserUseCase;
+            _getAllUsersUseCase = getAllUsersUseCase;
+            _getUserByLoginUseCase = getUserByLoginUseCase;
+            _updateUserUseCase = updateUserUseCase;
+            _getPagedUsersUseCase = getPagedUsersUseCase;
+            _registerBookForUserUseCase = registerBookForUserUseCase;
+            _authorizeUseCase = authorizeUseCase;
+            _registerUserUseCase = registerUserUseCase;
             _tokenService = tokenService;
         }
 
-        [HttpPost("registerInfo")]
-        public async Task<ActionResult<RefreshToken>> Register([FromBody] UserDTO dto)
+        [HttpPost("register")]
+        public async Task<ActionResult> Register([FromBody] UserInfoDTO dto)
         {
-            var tokens = await _userService.Register(dto);
+            var tokens = await _registerUserUseCase.Register(dto);
 
             return Ok(new
             {
@@ -32,10 +55,10 @@ namespace LibraryWebApp.API.Controllers
             });
         }
 
-        [HttpPost("authorizationInfo")]
-        public async Task<ActionResult<TokenDTO>> Authorize([FromBody] UserDTO dto)
+        [HttpPost("authorize")]
+        public async Task<ActionResult<TokenDTO>> Authorize([FromBody] UserInfoDTO dto)
         {
-            var user = await _userService.GetByLogin(dto.Login);
+            var user = await _getUserByLoginUseCase.GetByLogin(dto.Login);
 
             if (user == null)
                 throw new NotFoundException($"User with login {dto.Login} is not exist");
@@ -44,7 +67,7 @@ namespace LibraryWebApp.API.Controllers
             if (user.Password != dto.Password)
                 throw new InvalidPasswordException();
 
-            var tokens = await _userService.Authorize(dto);
+            var tokens = await _authorizeUseCase.Authorize(dto);
 
             return Ok(new TokenDTO
             {
@@ -57,7 +80,7 @@ namespace LibraryWebApp.API.Controllers
         [HttpPost]
         public async Task<ActionResult> Add(UserDTO dto)
         {
-            await _userService.Add(dto);
+            await _addUserUseCase.Add(dto);
             return Ok();
         }
 
@@ -65,7 +88,7 @@ namespace LibraryWebApp.API.Controllers
         [HttpDelete("{login}")]
         public async Task<ActionResult> Delete(string login)
         {
-            await _userService.Delete(login);
+            await _deleteUserUseCase.Delete(login);
             return Ok();
         }
 
@@ -73,24 +96,31 @@ namespace LibraryWebApp.API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetAll()
         {
-            await _userService.GetAll();
-            return Ok();
+            var users = await _getAllUsersUseCase.GetAll();
+            return Ok(users);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{login}")]
-        public async Task<ActionResult<User>> GetById(string login)
+        public async Task<ActionResult<User>> GetByLogin(string login)
         {
-            await _userService.GetByLogin(login);
-            return Ok();
+            var user = await _getUserByLoginUseCase.GetByLogin(login);
+            return Ok(user);
         }
 
         [Authorize]
         [HttpPut("{login}")]
         public async Task<ActionResult> Update(string login, UserDTO dto)
         {
-            await _userService.Update(login, dto);
+            await _updateUserUseCase.Update(login, dto);
             return Ok();
+        }
+
+        [HttpGet("{pageNumber}, {pageSize}")]
+        public async Task<ActionResult> GetPaged(int pageNumber, int pageSize)
+        {
+            var result = await _getPagedUsersUseCase.GetPagedUsers(new PaginationParams { PageNumber = pageNumber, PageSize = pageSize });
+            return Ok(result);
         }
     }
 }

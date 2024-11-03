@@ -14,15 +14,22 @@ namespace LibraryWebApp.Application.UseCases.UserUseCases
             _unitOfWork = unitOfWork;
             _tokenService = tokenService;
         }
-        public async Task<TokenDTO> Register(UserDTO dto)
+        public async Task<TokenDTO> Register(UserInfoDTO dto)
         {
             if (await _unitOfWork.Users.GetByLogin(dto.Login) != null)
                 throw new Exception($"User with login {dto.Login} is already exists");
 
-            var user = await _unitOfWork._userMapper.ToEntity(dto);
+            var user = await _unitOfWork._userMapper.ToEntity(new UserDTO
+            {
+                Login = dto.Login,
+                Password = dto.Password,
+                Role = "User",
+                TakenBooks = new List<UserBookDTO>(),
+                RefreshToken = string.Empty
+            });
 
-            var accessToken = _tokenService.GenerateAccessToken(user.Login, user.Role.ToString());
-            var refreshToken = await _tokenService.GenerateRefreshToken(user.Login, user.Role.ToString());
+            var accessToken = _tokenService.GenerateAccessToken(user);
+            var refreshToken = await _tokenService.GenerateRefreshToken(user.Login);
 
             user.RefreshTokens.Add(refreshToken);
 

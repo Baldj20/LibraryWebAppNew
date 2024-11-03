@@ -2,8 +2,8 @@
 
 namespace LibraryWebApp.Application.Abstractions.UseCases.UserUseCases
 {
-    public interface IAuthorizeUseCase
+    public interface IGetPagedUsersUseCase
     {
-        public Task<TokenDTO> Authorize(UserInfoDTO dto);
+        public Task<List<UserDTO>> GetPagedUsers(PaginationParams paginationParams);
     }
 }

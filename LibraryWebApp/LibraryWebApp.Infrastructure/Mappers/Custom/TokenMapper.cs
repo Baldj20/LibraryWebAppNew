@@ -20,7 +20,7 @@ namespace LibraryWebApp.Infrastructure.Mappers.Custom
         {
             return new RefreshToken(Guid.NewGuid(), dto.RefreshToken,
                 DateTime.UtcNow.AddDays(30), false, DateTime.UtcNow, 
-                dto.UserLogin, dto.Role);
+                dto.UserLogin);
         }
     }
 }

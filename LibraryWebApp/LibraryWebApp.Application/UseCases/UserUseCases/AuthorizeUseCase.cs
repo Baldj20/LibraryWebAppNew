@@ -16,14 +16,14 @@ namespace LibraryWebApp.Application.UseCases.UserUseCases
             _unitOfWork = unitOfWork;
             _tokenService = tokenService;
         }
-        public async Task<TokenDTO> Authorize(UserDTO dto)
+        public async Task<TokenDTO> Authorize(UserInfoDTO dto)
         {
             var user = await _unitOfWork.Users.GetByLogin(dto.Login);
             if (user == null)
                 throw new NotFoundException($"User with login {dto.Login} not found");
 
-            var access = _tokenService.GenerateAccessToken(user.Login, user.Role.ToString());
-            var refresh = await _tokenService.GenerateRefreshToken(access, user.Role.ToString());
+            var access = _tokenService.GenerateAccessToken(user);
+            var refresh = await _tokenService.GenerateRefreshToken(user.Login);
 
             return new TokenDTO
             {

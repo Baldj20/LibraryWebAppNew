@@ -4,6 +4,6 @@ namespace LibraryWebApp.Application.Abstractions.UseCases.UserUseCases
 {
     public interface IRegisterUserUseCase
     {
-        public Task<TokenDTO> Register(UserDTO dto);
+        public Task<TokenDTO> Register(UserInfoDTO dto);
     }
 }

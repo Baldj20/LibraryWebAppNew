@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using LibraryWebApp.Application.DTO;
+using LibraryWebApp.Domain;
 
 namespace LibraryWebApp.Infrastructure.Services
 {
@@ -33,34 +34,15 @@ namespace LibraryWebApp.Infrastructure.Services
             await _unitOfWork.RefreshTokens.Delete(id);
         }
 
-        public string GenerateAccessToken(string userLogin, string role)
+        public string GenerateAccessToken(User user)
         {
-            //var tokenHandler = new JwtSecurityTokenHandler();
-            //var key = Encoding.ASCII.GetBytes(_configuration.GetSection("JwtSettings").GetSection("SecretKey").Value);
-
-            //var claims = new List<Claim>()
-            //{
-            //    new Claim(ClaimTypes.Name, userLogin),
-            //    new Claim(ClaimTypes.Role, role)
-            //};
-
-            //var tokenDescriptor = new SecurityTokenDescriptor
-            //{
-            //    Subject = new ClaimsIdentity(claims),
-            //    Expires = DateTime.UtcNow.AddMinutes(5),
-            //    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-            //            SecurityAlgorithms.HmacSha256)
-            //};
-
-            //var token = tokenHandler.CreateToken(tokenDescriptor);
-            //return tokenHandler.WriteToken(token);
 
             var jwtSettings = _configuration.GetSection("JwtSettings");
 
             var claims = new[]
             {
-            new Claim(ClaimTypes.Name, userLogin),
-            new Claim(ClaimTypes.Role, role)
+            new Claim(ClaimTypes.Name, user.Login),
+            new Claim(ClaimTypes.Role, user.Role)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.GetSection("SecretKey").Value));
@@ -78,15 +60,14 @@ namespace LibraryWebApp.Infrastructure.Services
         }
     
 
-        public async Task<RefreshToken> GenerateRefreshToken(string userLogin, string role)
+        public async Task<RefreshToken> GenerateRefreshToken(string userLogin)
         {
             var refreshToken = new RefreshToken(Guid.NewGuid(),
                 Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
                 DateTime.UtcNow.AddDays(7),
                 false,
                 DateTime.UtcNow,
-                userLogin,
-                role);
+                userLogin);
 
             //user.RefreshTokens.Add(refreshToken);
             //_context.RefreshTokens.Add(_mapper.Map<RefreshTokenEntity>(refreshToken));
@@ -104,7 +85,7 @@ namespace LibraryWebApp.Infrastructure.Services
             foreach (var token in tokenEntities)
             {
                 var tokenDTO = _unitOfWork._tokenMapper.ToDTO(token);
-                tokenDTO.AccessToken = GenerateAccessToken(token.UserLogin, token.UserRole);
+                tokenDTO.AccessToken = GenerateAccessToken(await _unitOfWork.Users.GetByLogin(token.UserLogin));
                 tokensDTO.Add(tokenDTO);
             }
 
@@ -113,8 +94,9 @@ namespace LibraryWebApp.Infrastructure.Services
 
         public async Task<TokenDTO> GetById(Guid id)
         {
-            var tokenDTO = _unitOfWork._tokenMapper.ToDTO(await _unitOfWork.RefreshTokens.GetById(id));
-            tokenDTO.AccessToken = GenerateAccessToken(tokenDTO.UserLogin, tokenDTO.Role);
+            var refreshToken = await _unitOfWork.RefreshTokens.GetById(id);
+            var tokenDTO = _unitOfWork._tokenMapper.ToDTO(refreshToken);
+            tokenDTO.AccessToken = GenerateAccessToken(await _unitOfWork.Users.GetByLogin(refreshToken.UserLogin));
             return tokenDTO;
         }
 
@@ -132,8 +114,8 @@ namespace LibraryWebApp.Infrastructure.Services
             storedToken.IsRevoked = true;
             await _unitOfWork.RefreshTokens.Update(storedToken.Id, storedToken);
 
-            var newAccessToken = GenerateAccessToken(oldToken.UserLogin, oldToken.Role);
-            var newRefreshToken = await GenerateRefreshToken(storedToken.UserLogin, storedToken.UserRole);
+            var newAccessToken = GenerateAccessToken(await _unitOfWork.Users.GetByLogin(oldToken.UserLogin));
+            var newRefreshToken = await GenerateRefreshToken(storedToken.UserLogin);
 
             return new TokenDTO
             {

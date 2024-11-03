@@ -49,24 +49,6 @@ namespace LibraryWebApp.API
                     ValidAudience = jwtSettings.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
                 };
-                options.Events = new JwtBearerEvents
-                {
-                    OnAuthenticationFailed = context =>
-                    {
-                        Console.WriteLine("Authentication failed: " + context.Exception.Message);
-                        return Task.CompletedTask;
-                    },
-                    OnTokenValidated = context =>
-                    {
-                        Console.WriteLine("Token validated");
-                        return Task.CompletedTask;
-                    },
-                    OnChallenge = context =>
-                    {
-                        Console.WriteLine("OnChallenge error: " + context.Error + ", " + context.ErrorDescription);
-                        return Task.CompletedTask;
-                    }
-                };
             });
             builder.Services.AddAuthorization(options =>
             {
@@ -85,7 +67,7 @@ namespace LibraryWebApp.API
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Bearer {your token}",
+                    Description = "{your token}",
                 });
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -138,12 +120,14 @@ namespace LibraryWebApp.API
             builder.Services.AddScoped<IGetAuthorBooksUseCase, GetAuthorBooksUseCase>();
             builder.Services.AddScoped<IGetAuthorByIdUseCase, GetAuthorByIdUseCase>();
             builder.Services.AddScoped<IUpdateAuthorUseCase, UpdateAuthorUseCase>();
+            builder.Services.AddScoped<IGetPagedAuthorsUseCase, GetPagedAuthorsUseCase>();
 
             builder.Services.AddScoped<IAddBookUseCase, AddBookUseCase>();
             builder.Services.AddScoped<IDeleteBookUseCase, DeleteBookUseCase>();
             builder.Services.AddScoped<IGetAllBooksUseCase, GetAllBooksUseCase>();
             builder.Services.AddScoped<IGetBookByISBNUseCase, GetBookByISBNUseCase>();
             builder.Services.AddScoped<IUpdateBookUseCase, UpdateBookUseCase>();
+            builder.Services.AddScoped<IGetPagedBooksUseCase, GetPagedBooksUseCase>();
 
             builder.Services.AddScoped<IAddUserUseCase, AddUserUseCase>();
             builder.Services.AddScoped<IDeleteUserUseCase, DeleteUserUseCase>();
@@ -153,6 +137,7 @@ namespace LibraryWebApp.API
             builder.Services.AddScoped<IAuthorizeUseCase, AuthorizeUseCase>();
             builder.Services.AddScoped<IRegisterBookForUserUseCase, RegisterBookForUserUseCase>();
             builder.Services.AddScoped<IRegisterUserUseCase, RegisterUserUseCase>();
+            builder.Services.AddScoped<IGetPagedUsersUseCase, GetPagedUsersUseCase>();
 
             builder.Logging.AddConsole();
             var app = builder.Build();

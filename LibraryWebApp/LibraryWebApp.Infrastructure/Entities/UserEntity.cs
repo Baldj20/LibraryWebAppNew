@@ -4,7 +4,7 @@
     {
         public string Login { get; set; }
         public string Password { get; set; }
-        public int Role { get; set; }
+        public string Role { get; set; }
         public List<UserBookEntity> TakenBooks { get; set; }
         public List<RefreshTokenEntity> RefreshTokens { get; set; }
     }

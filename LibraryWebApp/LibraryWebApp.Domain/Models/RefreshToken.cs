@@ -3,7 +3,7 @@
     public class RefreshToken
     {
         public RefreshToken(Guid id, string token, 
-            DateTime expires, bool isRevoked, DateTime created, string userLogin, string userRole)
+            DateTime expires, bool isRevoked, DateTime created, string userLogin)
         {
             Id = id;
             Token = token;
@@ -11,7 +11,6 @@
             IsRevoked = isRevoked;
             Created = created;
             UserLogin = userLogin;
-            UserRole = userRole;
         }
         public Guid Id { get; set; }
         public string Token { get; set; }
@@ -19,6 +18,5 @@
         public bool IsRevoked { get; set; } = false;
         public DateTime Created { get; set; } = DateTime.UtcNow;
         public string UserLogin { get; set; }
-        public string UserRole { get; set; }
     }
 }

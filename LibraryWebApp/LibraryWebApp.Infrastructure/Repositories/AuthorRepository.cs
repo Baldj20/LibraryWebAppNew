@@ -20,22 +20,17 @@ namespace LibraryWebApp.Infrastructure.Repositories
         public async Task Add(Author entity)
         {
             var author = _mapper.Map<AuthorEntity>(entity);
-
+            
             await _context.Authors.AddAsync(author);
             await _context.SaveChangesAsync();
         }
 
         public async Task Delete(Guid id)
         {
-            //await _context.Authors
-            //    .Where(author => author.Id == id)
-            //    .ExecuteDeleteAsync();
             var author = await _context.Authors.Include(a => a.Books).FirstOrDefaultAsync(a => a.Id == id);
             if (author != null)
             {
-                // Удаляем все книги автора
                 _context.Books.RemoveRange(author.Books);
-                // Удаляем автора
                 _context.Authors.Remove(author);
                 await _context.SaveChangesAsync();
             }
