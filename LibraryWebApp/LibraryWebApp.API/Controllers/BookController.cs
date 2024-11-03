@@ -1,6 +1,7 @@
 ﻿using LibraryWebApp.Application;
 using LibraryWebApp.Application.Abstractions.UseCases.BookUseCases;
 using LibraryWebApp.Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryWebApp.API.Controllers
@@ -27,6 +28,7 @@ namespace LibraryWebApp.API.Controllers
             _getPagedBooksUseCase = getPagedBooksUseCase;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> Add(BookDTO dto)
         {
@@ -34,6 +36,7 @@ namespace LibraryWebApp.API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{isbn}")]
         public async Task<ActionResult> Delete(string isbn)
         {
@@ -48,6 +51,7 @@ namespace LibraryWebApp.API.Controllers
             return Ok(books);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{isbn}")]
         public async Task<ActionResult<BookDTO>> GetByISBN(string isbn)
         {
@@ -55,6 +59,7 @@ namespace LibraryWebApp.API.Controllers
             return Ok(book);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{isbn}")]
         public async Task<ActionResult> Update(string isbn, BookDTO dto)
         {

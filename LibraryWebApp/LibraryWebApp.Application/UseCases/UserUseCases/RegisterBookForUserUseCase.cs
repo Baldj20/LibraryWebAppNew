@@ -1,6 +1,7 @@
 ﻿using LibraryWebApp.Application.Abstractions.Repositories;
 using LibraryWebApp.Application.Abstractions.UseCases.UserUseCases;
-using LibraryWebApp.Domain;
+using LibraryWebApp.Application.DTO;
+using LibraryWebApp.Application.Exceptions;
 
 namespace LibraryWebApp.Application.UseCases.UserUseCases
 {
@@ -11,8 +12,11 @@ namespace LibraryWebApp.Application.UseCases.UserUseCases
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task RegisterBookForUser(User user, Book book, DateTime receiptDate, DateTime returnDate)
+        public async Task RegisterBookForUser(UserDTO userDTO, BookDTO bookDTO, DateTime receiptDate, DateTime returnDate)
         {
+            var book = await _unitOfWork._bookMapper.ToEntity(bookDTO);
+            if (book.Count == 0) throw new BookIsOutException();
+            var user = await _unitOfWork._userMapper.ToEntity(userDTO);
             await _unitOfWork.Users.RegisterBookForUser(user, book, receiptDate, returnDate);
         }
     }

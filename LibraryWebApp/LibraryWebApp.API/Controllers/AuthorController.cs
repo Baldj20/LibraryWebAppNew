@@ -1,6 +1,7 @@
 ﻿using LibraryWebApp.Application;
 using LibraryWebApp.Application.Abstractions.UseCases.AuthorUseCases;
 using LibraryWebApp.Application.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryWebApp.API.Controllers
@@ -30,6 +31,7 @@ namespace LibraryWebApp.API.Controllers
             _getPagedAuthorsUseCase = getPagedAuthorsUseCase;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> Add(AuthorDTO dto)
         {
@@ -37,6 +39,7 @@ namespace LibraryWebApp.API.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(Guid id)
         {
@@ -58,6 +61,7 @@ namespace LibraryWebApp.API.Controllers
             return Ok(books);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<AuthorDTO>> GetById([FromRoute(Name = "id")] Guid authorId)
         {
@@ -65,6 +69,7 @@ namespace LibraryWebApp.API.Controllers
             return Ok(author);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(Guid id, AuthorDTO dto)
         {

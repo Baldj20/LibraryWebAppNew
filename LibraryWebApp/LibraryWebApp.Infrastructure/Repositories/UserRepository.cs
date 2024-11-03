@@ -34,7 +34,7 @@ namespace LibraryWebApp.Infrastructure.Repositories
 
         public async Task<List<User>> GetAll()
         {
-            var userEntities = await _context.Authors
+            var userEntities = await _context.Users
                 .AsNoTracking()
                 .ToListAsync();
 

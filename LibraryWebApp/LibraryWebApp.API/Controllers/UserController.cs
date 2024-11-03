@@ -1,5 +1,7 @@
 ﻿using LibraryWebApp.Application;
+using LibraryWebApp.Application.Abstractions.Mappers;
 using LibraryWebApp.Application.Abstractions.Services;
+using LibraryWebApp.Application.Abstractions.UseCases.BookUseCases;
 using LibraryWebApp.Application.Abstractions.UseCases.UserUseCases;
 using LibraryWebApp.Application.DTO;
 using LibraryWebApp.Domain;
@@ -24,12 +26,13 @@ namespace LibraryWebApp.API.Controllers
         private readonly IAuthorizeUseCase _authorizeUseCase;
         private readonly IRegisterBookForUserUseCase _registerBookForUserUseCase;
         private readonly ITokenService _tokenService;
-
+        private readonly IGetBookByISBNUseCase _getBookByISBNUseCase;
         public UserController(IAddUserUseCase addUserUseCase, IDeleteUserUseCase deleteUserUseCase,
             IGetAllUsersUseCase getAllUsersUseCase, IGetUserByLoginUseCase getUserByLoginUseCase,
             IUpdateUserUseCase updateUserUseCase, IGetPagedUsersUseCase getPagedUsersUseCase,
             IRegisterUserUseCase registerUserUseCase, IAuthorizeUseCase authorizeUseCase,
-            IRegisterBookForUserUseCase registerBookForUserUseCase, ITokenService tokenService)
+            IRegisterBookForUserUseCase registerBookForUserUseCase, ITokenService tokenService,
+            IGetBookByISBNUseCase getBookByISBNUseCase)
         {
             _addUserUseCase = addUserUseCase;
             _deleteUserUseCase = deleteUserUseCase;
@@ -41,6 +44,7 @@ namespace LibraryWebApp.API.Controllers
             _authorizeUseCase = authorizeUseCase;
             _registerUserUseCase = registerUserUseCase;
             _tokenService = tokenService;
+            _getBookByISBNUseCase = getBookByISBNUseCase;
         }
 
         [HttpPost("register")]
@@ -77,6 +81,7 @@ namespace LibraryWebApp.API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> Add(UserDTO dto)
         {
@@ -121,6 +126,14 @@ namespace LibraryWebApp.API.Controllers
         {
             var result = await _getPagedUsersUseCase.GetPagedUsers(new PaginationParams { PageNumber = pageNumber, PageSize = pageSize });
             return Ok(result);
+        }
+
+        [HttpPut("books/{bookISBN}")]
+        public async Task<ActionResult> RegisterBookForUser(UserDTO userDTO, string bookISBN)
+        {
+            var bookDTO = await _getBookByISBNUseCase.GetByISBN(bookISBN);
+            await _registerBookForUserUseCase.RegisterBookForUser(userDTO, bookDTO, DateTime.UtcNow, DateTime.UtcNow.AddDays(30));
+            return Ok();
         }
     }
 }
