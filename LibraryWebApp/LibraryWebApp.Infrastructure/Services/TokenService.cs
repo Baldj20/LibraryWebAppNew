@@ -69,10 +69,6 @@ namespace LibraryWebApp.Infrastructure.Services
                 DateTime.UtcNow,
                 userLogin);
 
-            //user.RefreshTokens.Add(refreshToken);
-            //_context.RefreshTokens.Add(_mapper.Map<RefreshTokenEntity>(refreshToken));
-            //await _context.SaveChangesAsync();
-
             return refreshToken;
         }
 
@@ -102,9 +98,6 @@ namespace LibraryWebApp.Infrastructure.Services
 
         public async Task<TokenDTO> RefreshJWTToken(TokenDTO oldToken)
         {
-            //var storedToken = await _context.RefreshTokens
-            //.Include(rt => rt.User)
-            //.FirstOrDefaultAsync(rt => rt.Token.Equals(refreshToken) && !rt.IsRevoked);
             var storedToken = (await _unitOfWork.RefreshTokens.GetAll())
                 .Where(token => token.Token.Equals(oldToken.RefreshToken)).FirstOrDefault();
 
